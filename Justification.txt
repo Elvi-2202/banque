@@ -1,119 +1,119 @@
-Justificatif de choix de modélisation
+Justificatif de choix de modelisation
 Introduction :
-Dans le cadre de ce projet, l’objectif est de concevoir une base de données permettant de gérer un système bancaire intégrant : 
+Dans le cadre de ce projet, l’objectif est de concevoir une base de donnees permettant de gerer un système bancaire integrant : 
 	La gestion des clients 
 	Les comptes bancaires
-	Les transactions et opérations 
-	La sécurité (fraude ,audit)
+	Les transactions et operations 
+	La securite (fraude ,audit)
 	L’historique
  
 Analyse :
 	Les contraintes fournies :
 		Un client peut avoir plusieurs comptes
 		Un compte appartient à un seul client
-		Solde non négatif
+		Solde non negatif
 		Historisation obligatoire
-Interdiction de débit si solde insuffisant
+Interdiction de debit si solde insuffisant
  
-Choix de modélisation :
+Choix de modelisation :
 •	Table CLIENT :
 	La table CLIENT centralise les informations client
-		 id_client : identifiant unique du client (clé primaire)
+		 id_client : identifiant unique du client (cle primaire)
   		nom : nom du client
-prenom : prénom du client
+prenom : prenom du client
 email : adresse email (unique)
 date_naissance : date de naissance
-dt_entrer_relation : date d’entrée en relation avec la banque
-		mdp : mot de passe sécurisé
-dt_crea : date de création du compte
+dt_entrer_relation : date d’entree en relation avec la banque
+		mdp : mot de passe securise
+dt_crea : date de creation du compte
 dt_modif : date de dernière modification
  
 •	Table COMPTE_BANCAIRE :
-	La table  COMPTE_BANCAIRE  présente tout les comptes des clients
-		  id_compte : identifiant unique du compte (clé primaire)
+	La table  COMPTE_BANCAIRE  presente tout les comptes des clients
+		  id_compte : identifiant unique du compte (cle primaire)
 type : type de compte (COURANT, EPARGNE)
-  numero_compte : numéro unique du compte
+  numero_compte : numero unique du compte
   solde : montant disponible (≥ 0)
-  devise : devise du compte (par défaut EUR)
-  statut : état du compte (actif, suspendu…)
-  dt_crea : date de création
+  devise : devise du compte (par defaut EUR)
+  statut : etat du compte (actif, suspendu…)
+  dt_crea : date de creation
   dt_modif : date de modification
-  id_client : référence au client (clé étrangère)
+  id_client : reference au client (cle etrangère)
  
 •	Table TRANSACTION_BANCAIRE 
 La table TRANSACTION_BANCAIRE permet d’enregistrer toutes les transactions financières 
 id_transaction : identifiant unique
   montant : montant de la transaction
   dt_crea : date et heure de la transaction
-  description : détail de la transaction
-  id_compte_bancaire : compte concerné (clé étrangère)
+  description : detail de la transaction
+  id_compte_bancaire : compte concerne (cle etrangère)
   type : type (VIREMENT, DEPOT, RETRAIT)
  
 •	Table TYPE_OPERATION
-	La table TYPE_OPERATION est une table de référence des types d’opérations
+	La table TYPE_OPERATION est une table de reference des types d’operations
   id_type : identifiant unique
-  libelle : nom du type d’opération (unique)
+  libelle : nom du type d’operation (unique)
  
 •	Table OPERATION
-	La table OPERATION représente une operation métier liée à une transaction
+	La table OPERATION represente une operation metier liee à une transaction
   id_operation : identifiant unique
   montant : montant (> 0)
   statut : (EN_ATTENTE, VALIDE, REFUSE)
-  dt_exec : date d’exécution
-  ref_destinataire : référence du bénéficiaire
-  description : détail
-  id_transaction_bancaire : référence transaction (clé étrangère)
-  id_type_operation : type d’opération (clé étrangère)
+  dt_exec : date d’execution
+  ref_destinataire : reference du beneficiaire
+  description : detail
+  id_transaction_bancaire : reference transaction (cle etrangère)
+  id_type_operation : type d’operation (cle etrangère)
 •	Table BENEFICIAIRE
   	La table BENEFICIAIRE stocke les destinataires des virements
   id_beneficiaire : identifiant unique
   iban : IBAN (unique)
-  nom : nom du bénéficiaire
-  dt_crea : date de création
-  id_client : client propriétaire (clé étrangère)
+  nom : nom du beneficiaire
+  dt_crea : date de creation
+  id_client : client proprietaire (cle etrangère)
 •	Table CARTE_BANCAIRE 
-	La table CARTE_BANCAIRE représente les cartes associées aux comptes
+	La table CARTE_BANCAIRE represente les cartes associees aux comptes
   id_carte : identifiant unique
-  numero_carte : numéro de carte (unique)
+  numero_carte : numero de carte (unique)
   dt_expiration : date d’expiration
-  cvc : code de sécurité
+  cvc : code de securite
   plafond_paiement : limite de paiement
   statut : (ACTIVE, BLOQUEE, EXPIREE)
-  id_compte_bancaire : compte lié (unique, clé étrangère)
+  id_compte_bancaire : compte lie (unique, cle etrangère)
  
 •	Table SYSTEME
-	La table SYSTEME représente les utilisateurs internes
+	La table SYSTEME represente les utilisateurs internes
   id_systeme : identifiant unique
   email : email (unique)
   password : mot de passe
   role : (ADMIN, ANALYSTE, SUPPORT)
-  dt_crea : date de création
+  dt_crea : date de creation
  
 •	Table ALERTE_FRAUDE
-	La table ALERTE_FRAUDE permet de détecter et suivre les fraudes
+	La table ALERTE_FRAUDE permet de detecter et suivre les fraudes
   id_alerte_fraude : identifiant unique
   type : type d’alerte
   statut : (EN_COURS, TRAITEE, FAUSSE_ALERTE)
-  dt_alerte : date de détection
-  dt_resolu : date de résolution
-  id_transaction : transaction concernée (clé étrangère)
-  id_systeme : agent ayant traité (clé étrangère
+  dt_alerte : date de detection
+  dt_resolu : date de resolution
+  id_transaction : transaction concernee (cle etrangère)
+  id_systeme : agent ayant traite (cle etrangère
 •	Table AUDIT_LOGS
 	La table AUDIT_LOGS trace toutes les actions du système
   id_audit : identifiant unique
-  id_client : client concerné
+  id_client : client concerne
   id_systeme : utilisateur interne
-  id_compte : compte concerné
-  id_transaction : transaction concernée
-  action_effectuee : action réalisée
+  id_compte : compte concerne
+  id_transaction : transaction concernee
+  action_effectuee : action realisee
   dt_action : date
   ip_address : adresse IP
   details_technique : informations techniques
 Conclusion : 
-Le choix de modélisation repose sur :
-•	Une normalisation des données
-•	Une prise en compte des contraintes métier
-•	Une forte traçabilité et sécurité
+Le choix de modelisation repose sur :
+•	Une normalisation des donnees
+•	Une prise en compte des contraintes metier
+•	Une forte traçabilite et securite
  
 Tests et manipulation des requêtes SQL
  

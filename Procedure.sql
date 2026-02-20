@@ -21,7 +21,7 @@ BEGIN
         INSERT INTO transaction_bancaire(montant, id_compte_bancaire, type, description)
         VALUES (p_montant, p_source, 'VIREMENT', CONCAT('ECHEC : ', p_description));
         INSERT INTO audit_logs(id_client, id_systeme, id_compte, action_effectuee, details_technique)
-        VALUES (p_client, p_systeme, p_source, 'Virement annulé', CONCAT('Solde insuffisant : ', p_montant));
+        VALUES (p_client, p_systeme, p_source, 'Virement annule', CONCAT('Solde insuffisant : ', p_montant));
         ROLLBACK;
  
         SIGNAL SQLSTATE '45000'
@@ -41,7 +41,7 @@ BEGIN
     SET trans_id = LAST_INSERT_ID();
 
     INSERT INTO audit_logs(id_client, id_systeme, id_compte, id_transaction, action_effectuee, details_technique)
-    VALUES (p_client, p_systeme, p_source, trans_id, 'Virement exécuté', CONCAT('Vers compte ', p_destination, ', montant : ', p_montant));
+    VALUES (p_client, p_systeme, p_source, trans_id, 'Virement execute', CONCAT('Vers compte ', p_destination, ', montant : ', p_montant));
    
     COMMIT;
  

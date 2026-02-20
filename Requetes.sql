@@ -1,15 +1,15 @@
 WITH volumetotal AS (
     SELECT
         id_client,
-        SUM(solde) as montants_déposés
+        SUM(solde) as montants_deposes
     FROM compte_bancaire
     GROUP BY id_client
 )
 SELECT
     client.nom,
     client.prenom,
-    volumetotal.montants_déposés,
-    RANK() OVER (ORDER BY  volumetotal.montants_déposés DESC) as rang
+    volumetotal.montants_deposes,
+    RANK() OVER (ORDER BY  volumetotal.montants_deposes DESC) as rang
 FROM volumetotal
 JOIN client ON volumetotal .id_client = client.id_client
 LIMIT 10
