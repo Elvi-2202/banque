@@ -1,0 +1,156 @@
+Justificatif de choix de modélisation
+Introduction :
+Dans le cadre de ce projet, l’objectif est de concevoir une base de données permettant de gérer un système bancaire intégrant : 
+	La gestion des clients 
+	Les comptes bancaires
+	Les transactions et opérations 
+	La sécurité (fraude ,audit)
+	L’historique
+ 
+Analyse :
+	Les contraintes fournies :
+		Un client peut avoir plusieurs comptes
+		Un compte appartient à un seul client
+		Solde non négatif
+		Historisation obligatoire
+Interdiction de débit si solde insuffisant
+ 
+Choix de modélisation :
+•	Table CLIENT :
+	La table CLIENT centralise les informations client
+		 id_client : identifiant unique du client (clé primaire)
+  		nom : nom du client
+prenom : prénom du client
+email : adresse email (unique)
+date_naissance : date de naissance
+dt_entrer_relation : date d’entrée en relation avec la banque
+		mdp : mot de passe sécurisé
+dt_crea : date de création du compte
+dt_modif : date de dernière modification
+ 
+•	Table COMPTE_BANCAIRE :
+	La table  COMPTE_BANCAIRE  présente tout les comptes des clients
+		  id_compte : identifiant unique du compte (clé primaire)
+type : type de compte (COURANT, EPARGNE)
+  numero_compte : numéro unique du compte
+  solde : montant disponible (≥ 0)
+  devise : devise du compte (par défaut EUR)
+  statut : état du compte (actif, suspendu…)
+  dt_crea : date de création
+  dt_modif : date de modification
+  id_client : référence au client (clé étrangère)
+ 
+•	Table TRANSACTION_BANCAIRE 
+La table TRANSACTION_BANCAIRE permet d’enregistrer toutes les transactions financières 
+id_transaction : identifiant unique
+  montant : montant de la transaction
+  dt_crea : date et heure de la transaction
+  description : détail de la transaction
+  id_compte_bancaire : compte concerné (clé étrangère)
+  type : type (VIREMENT, DEPOT, RETRAIT)
+ 
+•	Table TYPE_OPERATION
+	La table TYPE_OPERATION est une table de référence des types d’opérations
+  id_type : identifiant unique
+  libelle : nom du type d’opération (unique)
+ 
+•	Table OPERATION
+	La table OPERATION représente une operation métier liée à une transaction
+  id_operation : identifiant unique
+  montant : montant (> 0)
+  statut : (EN_ATTENTE, VALIDE, REFUSE)
+  dt_exec : date d’exécution
+  ref_destinataire : référence du bénéficiaire
+  description : détail
+  id_transaction_bancaire : référence transaction (clé étrangère)
+  id_type_operation : type d’opération (clé étrangère)
+•	Table BENEFICIAIRE
+  	La table BENEFICIAIRE stocke les destinataires des virements
+  id_beneficiaire : identifiant unique
+  iban : IBAN (unique)
+  nom : nom du bénéficiaire
+  dt_crea : date de création
+  id_client : client propriétaire (clé étrangère)
+•	Table CARTE_BANCAIRE 
+	La table CARTE_BANCAIRE représente les cartes associées aux comptes
+  id_carte : identifiant unique
+  numero_carte : numéro de carte (unique)
+  dt_expiration : date d’expiration
+  cvc : code de sécurité
+  plafond_paiement : limite de paiement
+  statut : (ACTIVE, BLOQUEE, EXPIREE)
+  id_compte_bancaire : compte lié (unique, clé étrangère)
+ 
+•	Table SYSTEME
+	La table SYSTEME représente les utilisateurs internes
+  id_systeme : identifiant unique
+  email : email (unique)
+  password : mot de passe
+  role : (ADMIN, ANALYSTE, SUPPORT)
+  dt_crea : date de création
+ 
+•	Table ALERTE_FRAUDE
+	La table ALERTE_FRAUDE permet de détecter et suivre les fraudes
+  id_alerte_fraude : identifiant unique
+  type : type d’alerte
+  statut : (EN_COURS, TRAITEE, FAUSSE_ALERTE)
+  dt_alerte : date de détection
+  dt_resolu : date de résolution
+  id_transaction : transaction concernée (clé étrangère)
+  id_systeme : agent ayant traité (clé étrangère
+•	Table AUDIT_LOGS
+	La table AUDIT_LOGS trace toutes les actions du système
+  id_audit : identifiant unique
+  id_client : client concerné
+  id_systeme : utilisateur interne
+  id_compte : compte concerné
+  id_transaction : transaction concernée
+  action_effectuee : action réalisée
+  dt_action : date
+  ip_address : adresse IP
+  details_technique : informations techniques
+Conclusion : 
+Le choix de modélisation repose sur :
+•	Une normalisation des données
+•	Une prise en compte des contraintes métier
+•	Une forte traçabilité et sécurité
+ 
+Tests et manipulation des requêtes SQL
+ 
+avant index
+EXPLAIN ANALYZE 
+SELECT * FROM compte_bancaire WHERE solde > 5000;
+ 
+result: EXPLAIN
+Filter: (compte_bancaire.solde > 5000.00) (cost=0.75 rows=1.67) 
+(actual time=0.0112..0.0128 rows=2 loops=1)Table scan on compte_bancaire 
+(cost=0.75 rows=5) (actual time=0.00607..0.00764 rows=5 loops=1)
+ 
+apres index
+CREATE INDEX idx_compte_solde ON compte_bancaire(solde);
+ 
+EXPLAIN ANALYZE 
+SELECT * FROM compte_bancaire WHERE solde > 5000;
+ 
+result: EXPLAIN
+Index range scan on compte_bancaire using idx_compte_solde over (5000.00 < solde), 
+with index condition: (compte_bancaire.solde > 5000.00) (cost=1.16 rows=2) 
+(actual time=0.0401..0.0422 rows=2 loops=1)
+ 
+Avant index :
+MySQL fait un table scan: il lit toutes les lignes de la table compte_bancaire (5 lignes).
+Il filtre ensuite celles où solde > 5000.
+ 
+Apres index (idx_compte_solde) :
+MySQL fait un index range scan.
+Il va directement chercher les lignes où solde > 5000 grâce à un index.
+Il ne parcourt plus toute la table, seulement les valeurs utiles.
+ 
+Justifier les Choix:Expliquer pourquoi chaque index a ete cree et sur quelles colonnes.
+ 
+idx_client_email: il permet de verifier instantanement si le mail existe sans scanner toute la liste des clients.
+ 
+idx_compte_solde:il permet de trier les montants tres rapidement.
+ 
+idx_transac_date: il evite de fouiller dans des annees archives pour trouver les operations recentes.
+ 
